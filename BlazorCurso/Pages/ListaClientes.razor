@@ -1,0 +1,85 @@
+﻿@page "/ListaClientes"
+@using Data
+@using Interfaces
+@inject IClientesServices ClientesServicio
+@inject IJSRuntime JsRuntime;
+<h1>Lista Clientes</h1>
+
+
+@if (clientes == null)
+{
+    <p><em>Cargando....</em></p>
+}
+else
+{
+    <div class="input-group">
+        <input id="busqueda" @bind="@cadenaBusqueda" type="text" placeholder="Nombre/Email/Telefono" class="form-control">
+        <span class="input-group-btn">
+            <input type="submit" class="btn btn-default btn-info" value="Buscar" @onclick="(() => Buscar())" />
+        </span>
+    </div>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Email</th>
+                <th>Telefono</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (Cliente c in clientes)
+            {
+                <tr>
+                    <td>@c.Nombre</td>
+                    <td>@c.Email</td>
+                    <td>@c.Telefono</td>
+                    <td>
+                        <a href="/NuevoCliente/@c.Id" class="btn btn-primary m-1">Editar</a>
+                    </td>
+                    <td>
+                        <input type="submit" class="btn btn-danger" value="Borrar" @onclick="(() => Borrar(c.Id))" />
+                    </td>
+                </tr>
+            
+            }
+        </tbody>-
+    </table>
+
+}
+
+@code {
+
+    private IEnumerable<Cliente> clientes;
+    private string cadenaBusqueda { get; set; }
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            clientes = await ClientesServicio.DameTodosLosCLientes();
+        }
+        catch
+        {
+            throw;
+        }
+    }
+    protected async Task Borrar(int id)
+    {
+        bool confirmar = await JsRuntime.InvokeAsync<bool>("confirm", "Esta seguro?");
+        if (confirmar)
+        {
+            await ClientesServicio.BorrarCliente(id);
+
+            clientes = await ClientesServicio.DameTodosLosCLientes();
+        }
+    }
+
+    protected async Task Buscar()
+    {
+
+        clientes = await ClientesServicio.DameTodosLosCLientes(cadenaBusqueda.Trim());
+
+    }
+
+
+
+}

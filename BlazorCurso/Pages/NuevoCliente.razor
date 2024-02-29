@@ -1,0 +1,71 @@
+﻿@page "/NuevoCliente"
+@page "/NuevoCliente/{id:int}"
+@using Data
+@using Interfaces
+@inject IClientesServices ClientesServicio
+@inject NavigationManager navigationManager;
+
+<h1>Nuevo Cliente</h1>
+
+<EditForm Model="@cliente" OnValidSubmit="HandleValidSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="row content">
+        <div class="col-md-1"><label for="Nombre">Nombre</label></div>
+        <div class="col-md-2"><InputText id="name" @bind-Value="cliente.Nombre" /></div>
+        <div class="col-md-4"><ValidationMessage For="@(() => cliente.Nombre)" /> </div>
+    </div>
+    <div class="row content">
+        <div class="col-md-1"><label for="Email">Email</label></div>
+        <div class="col-md-2"><InputText id="EmailAddress" @bind-Value="cliente.Email" /></div>
+        <div class="col-md-4"><ValidationMessage For="@(() => cliente.Email)" /> </div>
+    </div>
+    <div class="row content">
+        <div class="col-md-1"><label for="Telefono">Telefono</label></div>
+        <div class="col-md-2"><InputText id="PhoneNumer" @bind-Value="cliente.Telefono" /></div>
+        <div class="col-md-4"><ValidationMessage For="@(() => cliente.Telefono)" /> </div>
+    </div>
+    <div class="row content">
+        <div class="col-md-1">   <input type="submit" class="btn btn-primary" value="Guardar" @onclick="Guardar" /></div>
+        <div class="col-md-2">
+            <input type="button" value="Cancelar" class="btn btn-danger" @onclick="Cancelar" />
+        </div>
+
+    </div>
+
+
+
+
+</EditForm>
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    Cliente cliente = new Cliente();
+
+    protected async Task Guardar()
+    {
+        await ClientesServicio.GuardarCliente(cliente);
+        navigationManager.NavigateTo("/ListaClientes");
+    }
+    protected void Cancelar()
+    {
+        navigationManager.NavigateTo("/ListaClientes");
+    }
+
+    private void HandleValidSubmit()
+    {
+        Console.WriteLine("OnValidSubmit");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (id > 0)
+        {
+            cliente = await ClientesServicio.DameDatosCliente(id);
+        }
+
+    }
+}
